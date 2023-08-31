@@ -18,6 +18,11 @@ import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Creates a [BitmapPainter] that draws a QR code for the given [content].
+ * The [size] parameter defines the size of the QR code in dp.
+ * The [padding] parameter defines the padding of the QR code in dp.
+ */
 @Composable
 fun rememberQrBitmapPainter(
     content: String,
@@ -50,6 +55,14 @@ fun rememberQrBitmapPainter(
     }
 }
 
+
+/**
+ * Generates a QR code bitmap for the given [content].
+ * The [sizePx] parameter defines the size of the QR code in pixels.
+ * The [paddingPx] parameter defines the padding of the QR code in pixels.
+ * Returns null if the QR code could not be generated.
+ * This function is suspendable and should be called from a coroutine is thread-safe.
+ */
 private suspend fun generateQrBitmap(
     content: String,
     sizePx: Int,
@@ -57,6 +70,7 @@ private suspend fun generateQrBitmap(
 ): Bitmap? = withContext(Dispatchers.IO) {
     val qrCodeWriter = QRCodeWriter()
 
+    // Set the QR code margin to the given padding
     val encodeHints = mutableMapOf<EncodeHintType, Any?>()
         .apply {
             this[EncodeHintType.MARGIN] = paddingPx
@@ -84,6 +98,12 @@ private suspend fun generateQrBitmap(
     }
 }
 
+/**
+ * Creates a default bitmap with the given [sizePx].
+ * The bitmap is transparent.
+ * This is used as a fallback if the QR code could not be generated.
+ * The bitmap is created on the UI thread.
+ */
 private fun createDefaultBitmap(sizePx: Int): Bitmap {
     return Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888).apply {
         eraseColor(Color.TRANSPARENT)
