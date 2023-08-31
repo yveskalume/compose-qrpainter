@@ -51,8 +51,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":qrpainter"))
-
+    implementation("com.github.yveskalume:compose-qrpainter:0.0.1")
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
