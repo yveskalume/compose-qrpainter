@@ -33,3 +33,6 @@ Image(
     contentDescription = null
 )
 ```
+
+## Credit
+The code of this library is inspired from [this article](https://dev.to/devniiaddy/qr-code-with-jetpack-compose-47e) by **Addy Godwin Nii**, with some enhancements in terms of readability and performance.
