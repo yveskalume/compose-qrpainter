@@ -1,7 +1,9 @@
 package com.yveskalume.compose.qrpainter
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +47,39 @@ fun rememberQrBitmapPainter(
     // Use dependency on 'content' to re-trigger the effect when content changes
     LaunchedEffect(content) {
         val bitmap = generateQrBitmap(content, sizePx, paddingPx)
+        bitmapState.value = bitmap
+    }
+
+    val bitmap = bitmapState.value ?: createDefaultBitmap(sizePx)
+
+    return remember(bitmap) {
+        BitmapPainter(bitmap.asImageBitmap())
+    }
+}
+
+@Composable
+fun rememberQrBitmapPainter(
+    content: String,
+    logo: Bitmap,
+    size: Dp = 600.dp,
+    padding: Dp = 0.dp
+): BitmapPainter {
+
+    check(content.isNotEmpty()) { "Content must not be empty" }
+    check(size >= 0.dp) { "Size must be positive" }
+    check(padding >= 0.dp) { "Padding must be positive" }
+
+    val density = LocalDensity.current
+    val sizePx = with(density) { size.roundToPx() }
+    val paddingPx = with(density) { padding.roundToPx() }
+
+    val bitmapState = remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    // Use dependency on 'content' to re-trigger the effect when content changes
+    LaunchedEffect(content) {
+        val bitmap = generateQrCodeWithOverlay(content, logo, sizePx, paddingPx)
         bitmapState.value = bitmap
     }
 
@@ -109,3 +144,66 @@ private fun createDefaultBitmap(sizePx: Int): Bitmap {
         eraseColor(Color.TRANSPARENT)
     }
 }
+
+/**
+ * Generate qr with logo inside
+ */
+
+private fun generateQrCodeWithOverlay(
+    qrCodeData: String,
+    image: Bitmap,
+    sizePx: Int,
+    paddingPx: Int
+): Bitmap? {
+
+    // The Error Correction level H provide a QR Code that can be covered by 30%
+    val encodeHints = HashMap<EncodeHintType?, Any?>().apply {
+//        this[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.H
+        this[EncodeHintType.MARGIN] = paddingPx
+    }
+
+    val qrWriter = QRCodeWriter()
+
+    return try {
+        val bitmapMatrix = qrWriter
+            .encode(qrCodeData, BarcodeFormat.QR_CODE, sizePx, sizePx, encodeHints)
+
+        val matrixWidth = bitmapMatrix.width
+        val matrixHeight = bitmapMatrix.height
+
+        val qrCodeBitmap = Bitmap.createBitmap(matrixWidth, matrixHeight, Bitmap.Config.ARGB_8888)
+
+        val qrCodeCanvas = Canvas(qrCodeBitmap)
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.color = Color.BLACK
+
+        for (y in 0 until sizePx) {
+            for (x in 0 until sizePx) {
+                if (bitmapMatrix[x, y]) {
+                    qrCodeCanvas.drawPoint(x.toFloat(), y.toFloat(), paint)
+                }
+            }
+        }
+
+
+        val scaleFactor = 8
+
+        image.density = image.density * scaleFactor
+
+        val scaledWidth = image.width / scaleFactor
+        val scaledHeight = image.height / scaleFactor
+
+        val xImage = (sizePx - scaledWidth) / 2f
+        val yImage = (sizePx - scaledHeight) / 2f
+
+        qrCodeCanvas.drawBitmap(image, xImage, yImage, null)
+        qrCodeBitmap
+    } catch (e: Exception) {
+        null
+    }
+}
+
+
+
+
