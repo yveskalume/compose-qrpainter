@@ -10,7 +10,7 @@ lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.2"
 compose-bom = "2023.03.00"
 appcompat = "1.6.1"
-material = "1.9.0"
+material = "1.11.0"
 
 [libraries]
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }
