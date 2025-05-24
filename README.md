@@ -8,17 +8,16 @@ The Jetpack Compose QRPainter is a library that allows you to generate QR codes 
 
 Setup the maven repository
 
-```kotlin
-repositories {
-    maven { url = uri("https://jitpack.io") }
-}
-```
 To use the library, add the following dependency to your project's `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("com.github.yveskalume.compose-qrpainter:0.0.1")
+    implementation("dev.yveskalume:compose-qrpainter:<version>")
 }
+```
+
+```toml
+compose-qrpainter = { group = "dev.yveskalume", name = "compose-qrpainter", version = "<last-version>" }
 ```
 
 ## Usage
